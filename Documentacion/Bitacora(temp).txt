@@ -1,0 +1,1 @@
+4/11: investigacion de OpenCV para captura y procesamiento de imagenes en python
