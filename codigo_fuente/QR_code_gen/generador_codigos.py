@@ -47,7 +47,7 @@ class gen_codQR:
 	def convertir(self, msj, tam):
 		for i in range(0, tam):
 			qr = pyqrcode.create(msj[i])
-			qr.svg(str(i) + "myqr.svg", scale = 8)
+			qr.png(str(i) + "myqr.png", scale = 8)
 
 	def protocolo(self, msj):
 		self.qr_0 += self.sha1
