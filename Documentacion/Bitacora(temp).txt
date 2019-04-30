@@ -1,1 +1,5 @@
 4/11: investigacion de OpenCV para captura y procesamiento de imagenes en python
+4/13: creación de códgigos QR con python
+4/13: creación de clases para convertir archivos TXT a QR de n bytes
+4/17: diseño del protocolo
+4/19: division del mensaje y generacion de qr con protocolo
