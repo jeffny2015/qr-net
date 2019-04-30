@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import uu
 import hashlib
 import pyqrcode
 import os
@@ -12,6 +13,7 @@ class gen_codQR:
 	msj_tam = 87
 	sha1 = ""
 	qr_0 = "1 0 0 "
+	num_rep = []
 
 	def __init__(self, mac_em, mac_re, ip_em, ip_re):
 		self.mac_em = mac_em
@@ -23,7 +25,9 @@ class gen_codQR:
 	# Entrada: (nombre de archivo)
 	# Salida: contenido del archivo
 	def leer_archivo(self, nom_arch):
-		arch =  open(nom_arch, 'rb')
+		arch_texto = self.msj_dir + 'temp.txt'
+		uu.encode(nom_arch, arch_texto)
+		arch =  open(arch_texto, 'rb')
 		cont = arch.read()
 		arch.close()
 		self.sha1 = self.codificar(cont)
@@ -46,8 +50,8 @@ class gen_codQR:
 	# Primero hay que definir el protocolo
 	def convertir(self, msj, tam):
 		for i in range(0, tam):
-			qr = pyqrcode.create(msj[i])
-			qr.png(str(i) + "myqr.png", scale = 8)
+			qr = pyqrcode.create(msj[i], mode = 'binary')
+			qr.png("images\\frame" + str(i) + ".png", scale = 8)
 
 	def protocolo(self, msj):
 		self.qr_0 += self.sha1
