@@ -10,7 +10,7 @@ from pyqrcode import QRCode
 class gen_codQR:
 
 	msj_dir = "D:\\braul\\Documents\\tec\\2019-I\\Redes\\Proyectos\\Proyecto1\\codigo_fuente\\Pruebas\\"
-	msj_tam = 58
+	msj_tam = 98
 	sha1 = ""
 	qr_0 = "1token0token0token"
 	num_rep = []
@@ -32,7 +32,7 @@ class gen_codQR:
 		cont = arch.read()
 		arch.close()
 		self.sha1 = self.codificar(cont)
-		self.sha1 += "token"
+		self.sha1 += " "
 		return cont
 
 	def codificar(self, cont):
@@ -61,10 +61,15 @@ class gen_codQR:
 		self.qr_0 += self.ip_em + " "
 		self.qr_0 += self.ip_re
 		largo_msj = len(msj)
-		msj = [("0token" + "0token" + str(i + 1) + "token" + self.sha1 + msj[i]) for i in range(0, largo_msj)]
+		#msj = [("0token" + self.setLast(i, largo_msj) +"token" + str(i + 1) + "token" + self.sha1 + msj[i]) for i in range(0, largo_msj)]
+		msj = [("0token" + self.setLast(i, largo_msj) + self.token + str(i + 1) + self.token + msj[i]) for i in range(0, largo_msj)]
 		msj = [self.qr_0] + msj
 		return msj
 
+	def setLast(self, i, largo_msj):
+		if i == (largo_msj - 1):
+			return '1'
+		return '0'
 
 	# Entrada: (nombre de archivo, tamaño de cada porción de texto)
 	def generar(self, nom_arch):
@@ -72,10 +77,12 @@ class gen_codQR:
 		bytes_arch = len(cont)
 		msj = self.dividir_archivo(cont, bytes_arch)
 		msj2 = self.protocolo(msj)
-		self.convertir(msj2, len(msj2))
+		tam = len(msj2)
+		self.convertir(msj2, tam)
+		return tam
 
 
-def main():
+'''def main():
 	mac_em_prueba = "0017FC340000"
 	mac_re_prueba = "0017FC250000"
 	ip_em_prueba = "172.16.254.1"
@@ -84,4 +91,4 @@ def main():
 	generador.generar("texto.txt")
 
 if __name__ == '__main__':
-	main()
+	main()'''
