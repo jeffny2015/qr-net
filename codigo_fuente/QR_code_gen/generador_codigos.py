@@ -10,10 +10,11 @@ from pyqrcode import QRCode
 class gen_codQR:
 
 	msj_dir = "D:\\braul\\Documents\\tec\\2019-I\\Redes\\Proyectos\\Proyecto1\\codigo_fuente\\Pruebas\\"
-	msj_tam = 87
+	msj_tam = 58
 	sha1 = ""
-	qr_0 = "1 0 0 "
+	qr_0 = "1token0token0token"
 	num_rep = []
+	token = "token"
 
 	def __init__(self, mac_em, mac_re, ip_em, ip_re):
 		self.mac_em = mac_em
@@ -31,7 +32,7 @@ class gen_codQR:
 		cont = arch.read()
 		arch.close()
 		self.sha1 = self.codificar(cont)
-		self.sha1 += "#"
+		self.sha1 += "token"
 		return cont
 
 	def codificar(self, cont):
@@ -60,7 +61,7 @@ class gen_codQR:
 		self.qr_0 += self.ip_em + " "
 		self.qr_0 += self.ip_re
 		largo_msj = len(msj)
-		msj = [("0 " + "0 " + str(i) + " " + self.sha1 + msj[i]) for i in range(0, largo_msj)]
+		msj = [("0token" + "0token" + str(i + 1) + "token" + self.sha1 + msj[i]) for i in range(0, largo_msj)]
 		msj = [self.qr_0] + msj
 		return msj
 
@@ -80,7 +81,7 @@ def main():
 	ip_em_prueba = "172.16.254.1"
 	ip_re_prueba = "192.168.1.24"
 	generador = gen_codQR(mac_em_prueba,mac_re_prueba,ip_em_prueba,ip_re_prueba)
-	generador.generar("texto3.txt")
+	generador.generar("texto.txt")
 
 if __name__ == '__main__':
 	main()
