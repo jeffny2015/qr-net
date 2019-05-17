@@ -44,12 +44,12 @@ def recieve(s, table, id):
         if data[:2] == 'TO':
             tmp_data = data.split(' ')
             to = tmp_data[1]
-            know_client = table.knowClient(to)
-            if know_client == servrIP():
+	    know_client = table.knowClient(to)
+            if tmp_data[1] == servrIP():
                 print ("Client asking for my ip")
-                s.send("ROUTE" + know_client)
+                s.send("ROUTE " + tmp_data[1])
             elif know_client != -1:
-                s.send("ROUTE" + know_client)
+                s.send("ROUTE " + know_client)
             else:
                 # for route and get the route
                 route = "Prueba Ruta" # route
