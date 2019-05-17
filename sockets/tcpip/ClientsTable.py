@@ -8,6 +8,12 @@ class ClientsTable:
         self.table.append(client)
         self.dictionary[client.getIP()] = client.getID()
 
+    def printTable(self):
+	print self.table
+
+    def getClient(self, cid):
+        return self.table[cid]
+
     def isClient(self, c):
         if c.getIP() in self.dictionary:
             return True

@@ -67,7 +67,8 @@ def recieve(s, table, id):
             to_who = tmp_data[3]
             print "Client [" + str(id) + "]: File" + filename + ", " + str(filesize) + "Bytes"
             s.send('OK')
-            name = 'clients/' + table[id].getIP() + '/' + filename
+            table.printTable()
+            name = 'clients/' + table.getClient(id).getIP() + '/' + filename
             f = open(name, 'wb')
             data = s.recv(WIDTH)
             totalRecv = len(data)
@@ -122,13 +123,15 @@ def main():
 
         if clients.isClient(client):
             index = clients.getID(client)
+            print "----" + index + "------"
             clients.update(client, index)
         else:
             print("New CLient")
-            count += 1
+            
             client.setID(count)
+            count += 1
             clients.add(client)
-            os.mkdir('clients/'+client.getIP()+':'+str(client.getPort())+'/')
+            os.mkdir('clients/'+client.getIP()+'/')
         index = clients.getID(client)
         t = threading.Thread(target=recieve, args=(client.getCon(), clients, index))
         t.start()
