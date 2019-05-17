@@ -5,6 +5,7 @@ import threading
 from ClientsTable import ClientsTable
 from Client import Client
 from Server import Server
+from Conection import Conection
 
 WIDTH = 1024
 
@@ -14,13 +15,18 @@ def servrIP():
     return ipv4
 
 
-def sendFile(s, table, id, to_id, filename, whos):
-    w = ''
-    for dest in whos:
-        w += dest + '/'
-    wh = w[:-1]
+# tabla_ips, id=index en la tabla ip, filename,whos= 192.168.1.1/192.168.1.2
+def sendFile(table, id, to_id, filename, whos, port):
+    dest = ''
+    for d in whos:
+        dest += d + '/'
+    new_dest = dest[:-1]
+
     if os.path.isfile('clients/'+table[id].getIP()+'/'+filename):
-        s.send("FILE " + str(os.path.getsize(filename) + " " + filename) + " " + whos)
+        con = Conection(port, table[to_id].getIP())
+        con.connect()
+        s = con.getsocket()
+        s.send("SEND " + str(os.path.getsize(filename) + " " + filename) + " " + new_dest)
         userResponse = s.recv(WIDTH)
         if userResponse[:2] == 'OK':
             with open(filename, 'rb') as f:
@@ -29,8 +35,7 @@ def sendFile(s, table, id, to_id, filename, whos):
                 while bytesToSend != "":
                     bytesToSend = f.read(WIDTH)
                     s.send(bytesToSend)
-    else:
-        s.send("ERROR")
+        con.close()
 
 
 def recieve(s, table, id):
@@ -44,7 +49,7 @@ def recieve(s, table, id):
         if data[:2] == 'TO':
             tmp_data = data.split(' ')
             to = tmp_data[1]
-	    know_client = table.knowClient(to)
+            know_client = table.knowClient(to)
             if tmp_data[1] == servrIP():
                 print ("Client asking for my ip")
                 s.send("ROUTE " + tmp_data[1])
@@ -60,7 +65,7 @@ def recieve(s, table, id):
             filesize = long(tmp_data[1])
             filename = tmp_data[2]
             to_who = tmp_data[3]
-            print"Client [" + str(id) + "]: File" + filename + ", " + str(filesize) + "Bytes"
+            print "Client [" + str(id) + "]: File" + filename + ", " + str(filesize) + "Bytes"
             s.send('OK')
             name = 'clients/' + table[id].getIP() + '/' + filename
             f = open(name, 'wb')
@@ -71,38 +76,30 @@ def recieve(s, table, id):
                 data = s.recv(WIDTH)
                 totalRecv += len(data)
                 f.write(data)
-                print("{0:.2f}".format((totalRecv / float(filesize)) * 100) + "% Done")
-            print("Download Complete!")
+                print "{0:.2f}".format((totalRecv / float(filesize)) * 100) + "% Done"
+            print "Download Complete!"
 
             tmp = to_who.split('/')
 
-            if len(tmp) == 1:
-                if tmp[0] == servrIP():
-                    print "FILE to the server"
-                else:
-                    ip = tmp[0]
-                    index = table.getIndex(ip)
-                    if index != -1:
-                        sendFile(table[index].getCon(), table, id, index, name, tmp)
-                    else:
-                        print("Search")
-            elif len(tmp) > 1:
+            if tmp[0] == '':
+                print "Got file from client to me"
+            elif len(tmp) >= 1:
                 ip = tmp[0]
                 index = table.getIndex(ip)
                 if index != -1:
-                    sendFile(table[index].getCon(), table, id, index, name, tmp[1:])
+                    sendFile(table, id, index, name, tmp[1:], 12346)
                 else:
-                    print("Search")
+                    print 'No Client with ip= ' + ip
             else:
-                print("Message Error")
+                print "Sending Message Error"
 
-        if data[:3] == 'BYE':
-            print("Client [" + str(id) + "]: BYE")
+        if data[:2] == 'BY':
+            print "Client [" + str(id) + "]: BY"
 
 
 def main():
 
-    print("Initializing Server")
+    print "Initializing Server"
 
     if not os.path.isdir('clients'):
         os.mkdir('clients')
