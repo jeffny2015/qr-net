@@ -30,13 +30,15 @@ def requestIP(con, ip):
 
 def main():
 
-    host = "127.0.0.1"
+    host = "172.28.130.42"
     port = 12345
 
     con = Conection(port, host)
     con.connect()
 
     hello(con.getsocket())
+    ip = requestIP(con.getsocket(), host)
+    print ip
     bye(con.getsocket())
 
     #filename = raw_input("Filename -> ")
