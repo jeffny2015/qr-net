@@ -45,7 +45,10 @@ def recieve(s, table, id):
             tmp_data = data.split(' ')
             to = tmp_data[1]
             know_client = table.knowClient(to)
-            if know_client != -1:
+            if know_client == servrIP():
+                print ("Client asking for my ip")
+                s.send("ROUTE" + know_client)
+            elif know_client != -1:
                 s.send("ROUTE" + know_client)
             else:
                 # for route and get the route
@@ -93,8 +96,8 @@ def recieve(s, table, id):
             else:
                 print("Message Error")
 
-        if data[:2] == 'BY':
-            print("Client [" + str(id) + "]: BY")
+        if data[:3] == 'BYE':
+            print("Client [" + str(id) + "]: BYE")
 
 
 def main():

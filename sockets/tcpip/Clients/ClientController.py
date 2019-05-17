@@ -4,7 +4,6 @@ WIDTH = 1024
 
 
 def hello(con):
-    #print ("Send HELLO")
     con.send('HELLO ')
     data = con.recv(WIDTH)
 
@@ -14,20 +13,21 @@ def hello(con):
         print("Something is wrong")
 
 
-def by(con):
-    con.send('BY ')
-    #data = con.recv(WIDTH)
-
-    #if data[:2] == 'BY':
-    print('Server say BY')
-    #else:
-    #    print("Something is wrong")
+def bye(con):
+    con.send('BYE ')
+    print('Server say BYE')
     con.close()
 
 
 def requestIP(con, ip):
     con.send('TO ' + ip)
-    
+    data = con.recv(WIDTH)
+    if data[:5] == 'ROUTE':
+        tmp = data.split(' ')
+        return tmp[1]
+    return '-1'
+
+
 def main():
 
     host = "127.0.0.1"
@@ -37,7 +37,7 @@ def main():
     con.connect()
 
     hello(con.getsocket())
-    by(con.getsocket())
+    bye(con.getsocket())
 
     #filename = raw_input("Filename -> ")
     #print("Filename:" + filename)
