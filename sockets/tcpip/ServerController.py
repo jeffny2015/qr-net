@@ -16,17 +16,22 @@ def servrIP():
 
 
 # tabla_ips, id=index en la tabla ip, filename,whos= 192.168.1.1/192.168.1.2
-def sendFile(table, id, to_id, filename, whos, port):
+def sendFile(table, id, to_id, filename, whos, port, dest_port):
     dest = ''
     for d in whos:
         dest += d + '/'
     new_dest = dest[:-1]
 
+    dest_ports = ''
+    for d in port:
+        dest_ports += d + '/'
+    dest_ports = dest_ports[:-1]
+
     if os.path.isfile('clients/'+table[id].getIP()+'/'+filename):
-        con = Conection(port, table[to_id].getIP())
+        con = Conection(dest_port, table[to_id].getIP())
         con.connect()
         s = con.getsocket()
-        s.send("SEND " + str(os.path.getsize(filename) + " " + filename) + " " + new_dest)
+        s.send("SEND " + str(os.path.getsize(filename) + ' ' + filename) + ' ' + new_dest + ' ' + dest_ports)
         userResponse = s.recv(WIDTH)
         if userResponse[:2] == 'OK':
             with open(filename, 'rb') as f:
@@ -45,6 +50,9 @@ def recieve(s, table, id):
 
         if data[:5] == 'HELLO':
             print('Got HELLO from Client')
+            tmp = data.split(' ')
+            listen_port = tmp[1]
+            table.getClient(id).setListenPort(listen_port)
             s.send("HELLO ")
         if data[:2] == 'TO':
             tmp_data = data.split(' ')
@@ -52,9 +60,11 @@ def recieve(s, table, id):
             know_client = table.knowClient(to)
             if tmp_data[1] == servrIP():
                 print ("Client asking for my ip")
+                #Probablemente agregar otra cosa al cliente cuando es para el el server principal
                 s.send("ROUTE " + tmp_data[1])
             elif know_client != -1:
-                s.send("ROUTE " + know_client)
+
+                s.send("ROUTE " + table.getClient(know_client).getIP() + " " + table.getClient(know_client).getListenPort())
             else:
                 # for route and get the route
                 route = "Prueba Ruta" # route
@@ -65,6 +75,7 @@ def recieve(s, table, id):
             filesize = long(tmp_data[1])
             filename = tmp_data[2]
             to_who = tmp_data[3]
+            ports = tmp_data[4]
             print "Client [" + str(id) + "]: File" + filename + ", " + str(filesize) + "Bytes"
             s.send('OK')
             table.printTable()
@@ -87,8 +98,10 @@ def recieve(s, table, id):
             elif len(tmp) >= 1:
                 ip = tmp[0]
                 index = table.getIndex(ip)
+                #Revisar esta
                 if index != -1:
-                    sendFile(table, id, index, name, tmp[1:], 12346)
+                    dest_ports = ports.split('/')
+                    sendFile(table, id, index, name, tmp[1:], dest_ports[1:], dest_ports[0])
                 else:
                     print 'No Client with ip= ' + ip
             else:

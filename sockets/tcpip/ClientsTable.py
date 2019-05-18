@@ -3,13 +3,15 @@ class ClientsTable:
     def __init__(self):
         self.table = []
         self.dictionary = {}
+        self.listen = {}
 
     def add(self, client):
         self.table.append(client)
         self.dictionary[client.getIP()] = client.getID()
+        self.listen[client.getIP()] = client.getListenPort()
 
     def printTable(self):
-	print self.table
+        print self.table
 
     def getClient(self, cid):
         return self.table[cid]
@@ -34,6 +36,12 @@ class ClientsTable:
 
     def getID(self, c):
         return int(self.dictionary[c.getIP()])
+
+    def getLPort(self, ip):
+        if ip in self.listen:
+            return self.listen[ip]
+        else:
+            return -1
 
     def update(self, c, i):
         self.table[i].setIP(c.getIP())
