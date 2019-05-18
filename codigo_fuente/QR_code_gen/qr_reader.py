@@ -12,10 +12,8 @@ num = 0
 sha1 = ""
 msj = ""
 file_name = ""
-ip_dest = ""
-ip_send = ""
-mac_dest = ""
-mac_send = ""
+ports = ""
+ips = ""
 final = 0
 
 def escribir_archivo():
@@ -36,10 +34,8 @@ while True:
 		if int(datos[0]) == 1:
 			direcciones = datos[3].split(' ')
 			sha1 = direcciones[0]
-			mac_send = direcciones[1]
-			mac_dest = direcciones[2]
-			ip_send = direcciones[3]
-			ip_dest = direcciones[4]
+			ips = direcciones[1]
+			ports = direcciones[2]
 		else:
 			if n == 1:
 				file_name = re.search("\dtoken\dtoken\dtoken.{40}tokenbegin 666 (.+\..+)\n", datos[3])
@@ -51,8 +47,6 @@ while True:
 	if final == 1:
 		escribir_archivo()
 		print sha1
-		print mac_send
-		print mac_dest
-		print ip_send
-		print ip_dest
+		print ips
+		print ports
 		break

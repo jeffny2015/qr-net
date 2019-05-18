@@ -16,12 +16,9 @@ class gen_codQR:
 	num_rep = []
 	token = "token"
 
-	def __init__(self, mac_em, mac_re, ip_em, ip_re):
-		self.mac_em = mac_em
-		self.mac_re = mac_re
-		self.ip_em = ip_em
-		self.ip_re = ip_re
-
+	def __init__(self, ips , ports):
+		self.ips = ips
+		self.ports = ports
 
 	# Entrada: (nombre de archivo)
 	# Salida: contenido del archivo
@@ -56,10 +53,8 @@ class gen_codQR:
 
 	def protocolo(self, msj):
 		self.qr_0 += self.sha1
-		self.qr_0 += self.mac_em + " "
-		self.qr_0 += self.mac_re + " "
-		self.qr_0 += self.ip_em + " "
-		self.qr_0 += self.ip_re
+		self.qr_0 += self.ips + " "
+		self.qr_0 += self.ports
 		largo_msj = len(msj)
 		#msj = [("0token" + self.setLast(i, largo_msj) +"token" + str(i + 1) + "token" + self.sha1 + msj[i]) for i in range(0, largo_msj)]
 		msj = [("0token" + self.setLast(i, largo_msj) + self.token + str(i + 1) + self.token + msj[i]) for i in range(0, largo_msj)]
@@ -83,11 +78,11 @@ class gen_codQR:
 
 
 '''def main():
-	mac_em_prueba = "0017FC340000"
-	mac_re_prueba = "0017FC250000"
-	ip_em_prueba = "172.16.254.1"
-	ip_re_prueba = "192.168.1.24"
-	generador = gen_codQR(mac_em_prueba,mac_re_prueba,ip_em_prueba,ip_re_prueba)
+	file_size_prueba = "0017FC340000"
+	file_name_prueba = "0017FC250000"
+	ips_prueba = "172.16.254.1"
+	ports_prueba = "192.168.1.24"
+	generador = gen_codQR(file_size_prueba,file_name_prueba,ips_prueba,ports_prueba)
 	generador.generar("texto.txt")
 
 if __name__ == '__main__':
