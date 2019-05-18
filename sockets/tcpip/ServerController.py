@@ -8,6 +8,7 @@ from Server import Server
 from Conection import Conection
 
 WIDTH = 1024
+PORT = 12345
 
 
 def servrIP():
@@ -61,7 +62,7 @@ def recieve(s, table, id):
             if tmp_data[1] == servrIP():
                 print ("Client asking for my ip")
                 #Probablemente agregar otra cosa al cliente cuando es para el el server principal
-                s.send("ROUTE " + tmp_data[1])
+                s.send("ROUTE " + tmp_data[1] + ' ' + str(PORT))
             elif know_client != -1:
 
                 s.send("ROUTE " + table.getClient(know_client).getIP() + " " + table.getClient(know_client).getListenPort())
@@ -81,17 +82,17 @@ def recieve(s, table, id):
             table.printTable()
             name = 'clients/' + table.getClient(id).getIP() + '/' + filename
             f = open(name, 'wb')
-            data = s.recv(WIDTH)
+	    data = s.recv(WIDTH)
             totalRecv = len(data)
             f.write(data)
             while totalRecv < filesize:
                 data = s.recv(WIDTH)
                 totalRecv += len(data)
-                f.write(data)
+		f.write(data)
                 print "{0:.2f}".format((totalRecv / float(filesize)) * 100) + "% Done"
             print "Download Complete!"
-
-            tmp = to_who.split('/')
+	    f.close()
+	    tmp = to_who.split('/')
 
             if tmp[0] == '':
                 print "Got file from client to me"
@@ -136,15 +137,14 @@ def main():
 
         if clients.isClient(client):
             index = clients.getID(client)
-            print "----" + index + "------"
             clients.update(client, index)
         else:
             print("New CLient")
-            
             client.setID(count)
             count += 1
             clients.add(client)
-            os.mkdir('clients/'+client.getIP()+'/')
+	    if not os.path.exists('clients/'+client.getIP()+'/'):
+            	os.mkdir('clients/'+client.getIP()+'/')
         index = clients.getID(client)
         t = threading.Thread(target=recieve, args=(client.getCon(), clients, index))
         t.start()

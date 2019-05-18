@@ -1,6 +1,5 @@
 from Conection import Conection
 import os
-
 import socket
 
 WIDTH = 1024

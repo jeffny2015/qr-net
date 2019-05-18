@@ -5,6 +5,7 @@ class Client:
         self.ip = ip
         self.port = port
         self.con = con
+        self.listen_port = ''
 
     def getID(self):
         return self.id
@@ -29,6 +30,12 @@ class Client:
 
     def setCon(self, con):
         self.con = con
+
+    def setListenPort(self, port):
+        self.listen_port = port
+
+    def getListenPort(self):
+        return self.listen_port
 
     def __str__(self):
         print "Client [" + self.id + "] { \nIP Addr: " \
