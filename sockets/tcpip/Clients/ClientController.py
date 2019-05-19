@@ -1,7 +1,30 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from Conection import Conection
 import os
-
+import threading
+from qr_generator import gen_codQR
+from qr_showcase import display_qr
 import socket
+
+import numpy as np
+import cv2
+import sys
+import time
+import pyzbar.pyzbar as pyzbar
+import uu
+import re
+
+
+cap = cv2.VideoCapture(0)
+num = 0
+sha1 = ""
+msj = ""
+file_name = ""
+ports = ""
+ips = ""
+
+
 
 WIDTH = 1024
 PORT = 12346
@@ -97,9 +120,51 @@ def sendFile(socket, ip, port, filename, host):
 		s.close()
 
 
+
+
+def escribir_archivo():
+	arch_texto = 'temp2.txt'
+	arch =  open(arch_texto, 'w+')
+	cont = arch.write(msj)
+	arch.close()
+	uu.decode(arch_texto, file_name)
+
+def watch():
+	final = 0
+	while True:
+		_, frame = cap.read()
+		decodedObjects = pyzbar.decode(frame)
+		for obj in decodedObjects:
+			print("Data", obj.data)
+			datos = obj.data.split('token')
+			n = int(datos[2])
+			final = int(datos[1])
+			if int(datos[0]) == 1:
+				direcciones = datos[3].split(' ')
+				sha1 = direcciones[0]
+				ips = direcciones[1]
+				ports = direcciones[2]
+			else:
+				if n == 1:
+					file_name = re.search("\dtoken\dtoken\dtoken.{40}tokenbegin 666 (.+\..+)\n", datos[3])
+				if num != n:
+					num = n
+					msj += datos[3]
+		cv2.imshow("Frame", frame)
+		key = cv2.waitKey(1)
+		if final == 1:
+			escribir_archivo()
+			print sha1
+			print ips
+			print ports
+			final = 0
+
 def main():
+
+	t = threading.Thread(target=watch)
+	t.start()
 	print "-------------------------main"
-	host = "10.20.104.169"
+	host = "172.28.130.42"
 	port = 12345
 
 	con = Conection(port, host)
@@ -107,9 +172,14 @@ def main():
 
 	hello(con.getsocket())
 	# bye(con.getsocket())
-	ip, set_port = requestIP(con.getsocket(), host) #lo que le entra aqui es la ip por la que quiere enviar un archivo, la ip por que que tiene que enviar basicamente
-	sendFile(con.getsocket(), ip, set_port, "aaaaaaaaaaaaa.txt", host)
-
+	ip, set_port = requestIP(con.getsocket(), "172.28.130.110") #lo que le entra aqui es la ip por la que quiere enviar un archivo, la ip por que que tiene que enviar basicamente
+	s = ip.split('/') #sendFile(con.getsocket(), ip, set_port, "aaaaaaaaaaaaa.txt", host)
+	print s[0]
+	if s[0] == "172.28.130.110":
+		generador = gen_codQR(ip, set_port)
+		file_name = raw_input()
+		tam = generador.generar(file_name)
+		disp = display_qr(tam)
 
 # filename = raw_input("Filename -> ")
 # print("Filename:" + filename)

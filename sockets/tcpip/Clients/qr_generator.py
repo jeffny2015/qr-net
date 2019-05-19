@@ -9,7 +9,7 @@ from pyqrcode import QRCode
 
 class gen_codQR:
 
-	msj_dir = "D:\\braul\\Documents\\tec\\2019-I\\Redes\\Proyectos\\Proyecto1\\codigo_fuente\\Pruebas\\"
+	msj_dir = "/home/braulio/Desktop/tec/2019_I/Redes/Proyecto/proyectoqr/qr-net/codigo_fuente/Pruebas/"
 	msj_tam = 98
 	sha1 = ""
 	qr_0 = "1token0token0token"
