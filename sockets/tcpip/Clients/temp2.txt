@@ -1,4 +1,0 @@
-begin 666 texto.txt
-317-T;R!E<R!U;F$@<')U96)A+@  
- 
-end
