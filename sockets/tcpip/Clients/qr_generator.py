@@ -9,7 +9,7 @@ from pyqrcode import QRCode
 
 class gen_codQR:
 
-	msj_dir = "/home/braulio/Desktop/tec/2019_I/Redes/Proyecto/proyectoqr/qr-net/codigo_fuente/Pruebas/"
+	msj_dir = "/home/braulio/Desktop/messages/"
 	msj_tam = 98
 	sha1 = ""
 	qr_0 = "1token0token0token"
@@ -23,7 +23,7 @@ class gen_codQR:
 	# Entrada: (nombre de archivo)
 	# Salida: contenido del archivo
 	def leer_archivo(self, nom_arch):
-		arch_texto = self.msj_dir + 'temp.txt'
+		arch_texto = 'temps/temp.txt'
 		uu.encode(nom_arch, arch_texto)
 		arch =  open(arch_texto, 'rb')
 		cont = arch.read()
@@ -49,7 +49,7 @@ class gen_codQR:
 	def convertir(self, msj, tam):
 		for i in range(0, tam):
 			qr = pyqrcode.create(msj[i], mode = 'binary')
-			qr.png("images\\frame" + str(i) + ".png", scale = 8)
+			qr.png("qrs/frame" + str(i) + ".png", scale = 8)
 
 	def protocolo(self, msj):
 		self.qr_0 += self.sha1

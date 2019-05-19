@@ -13,7 +13,7 @@ class display_qr():
 		self.root = Tk()
 		self.canvas = Canvas(self.root, width = 600, height = 600)
 		self.canvas.pack()
-		self.name = "images\\frame" + str(self.cont) + ".png"
+		self.name = "qrs/frame" + str(self.cont) + ".png"
 		self.img = ImageTk.PhotoImage(Image.open(self.name))
 		self.canvas.create_image(0, 0, anchor=NW, image=self.img)
 		self.canvas.after(1000, self.update)
@@ -22,7 +22,7 @@ class display_qr():
 	def update(self):
 		self.cont += 1
 		if(self.cont < self.quantity):
-			self.name = "images\\frame" + str(self.cont) + ".png"
+			self.name = "qrs/frame" + str(self.cont) + ".png"
 			self.img = ImageTk.PhotoImage(Image.open(self.name))
 			self.canvas.create_image(0, 0, anchor=NW, image=self.img)
 			self.canvas.after(1000, self.update)
