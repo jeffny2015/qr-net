@@ -56,9 +56,11 @@ def recieve(s, table, id):
             table.getClient(id).setListenPort(listen_port)
             s.send("HELLO ")
         if data[:2] == 'TO':
+	    print('TO Request')
             tmp_data = data.split(' ')
             to = tmp_data[1]
             know_client = table.knowClient(to)
+	    print str(know_client) + ' ' + tmp_data[1] 
             if tmp_data[1] == servrIP():
                 print ("Client asking for my ip")
                 #Probablemente agregar otra cosa al cliente cuando es para el el server principal
