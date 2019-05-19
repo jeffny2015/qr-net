@@ -27,7 +27,7 @@ ips = ""
 
 
 WIDTH = 1024
-PORT = 12346
+PORT = 12347
 
 def hello(con):
 	print "-------------------------hello"
@@ -72,6 +72,7 @@ def sendFile(socket, ip, port, filename, host):
 		new_dest = new_dest[:-1]
 
 	if os.path.isfile(filename):
+		print "entro"
 		if dest_ip[0] == host:
 
 			dest_ports = port.split('/')
@@ -81,6 +82,7 @@ def sendFile(socket, ip, port, filename, host):
 			new_dest_ports = new_dest_ports[:-1]
 
 			s = socket
+			print "Sending File"
 			s.send('SEND ' + str(os.path.getsize(filename)) + ' ' + filename + ' ' + new_dest + ' ' + new_dest_ports )
 
 			data = s.recv(WIDTH)
@@ -100,10 +102,11 @@ def sendFile(socket, ip, port, filename, host):
 			for d in dest_ports[1:]:
 				new_dest_ports += d + '/'
 			new_dest_ports = new_dest_ports[:-1]
-
-			file_transfer = Conection(dest_ports[0], dest_host)
+			print dest_ports[0], dest_host
+			file_transfer = Conection(int(dest_ports[0]), dest_host)
 			file_transfer.connect()
 			s = file_transfer.getsocket()
+			print "Sending File"
 			s.send('SEND ' + str(os.path.getsize(filename)) + ' ' + filename + ' ' + new_dest + ' ' + new_dest_ports)
 
 			data = s.recv(WIDTH)
@@ -121,13 +124,19 @@ def sendFile(socket, ip, port, filename, host):
 
 
 def recieve(con, ip, port, host):
+	print "entro al while"
 	data = con.recv(WIDTH)
+	print data
 	if data[:4] == 'SEND':
 		tmp_data = data.split(' ')
 		filesize = long(tmp_data[1])
 		filename = tmp_data[2]
-		to_who = tmp_data[3]
-		ports = tmp_data[4]
+		if len(tmp_data) == 3:
+			to_who = ""	
+			ports = ""
+		else:
+			to_who = tmp_data[3]
+			ports = tmp_data[4]
 		print "File" + filename + ", " + str(filesize) + "Bytes"
 		con.send('OK')
 		f = open(filename, 'wb')
@@ -168,12 +177,11 @@ def listen_Con(listen_port,host):
 	server = Server(listen_port)
 	server.bind()
 	server.listen(allowed_clients)
-
+	print "Listen port: " + str(listen_port)
 	while True:
 		con, addr = server.accept()
 		print "Got connection from => " + addr[0] + ":" + str(addr[1])
-		t = threading.Thread(target=recieve, args=(con, addr[0], addr[1], host))
-        t.start()
+		recieve(con, addr[0], addr[1], host)
 
 
 def escribir_archivo(fn):
@@ -227,9 +235,10 @@ def watch():
 def main():
 	host = "172.28.130.42"
 	port = 12345
-	t = threading.Thread(target=watch)
-	t.start()
-	t2 = threading.Thread(target=listen_Con, args=(HOST, host))
+	#t = threading.Thread(target=watch)
+	#t.start()
+	t2 = threading.Thread(target=listen_Con, args=(PORT, host))
+	t2.start()
 	con = Conection(port, host)
 	con.connect()
 
@@ -241,12 +250,12 @@ def main():
 		ip, set_port = requestIP(con.getsocket(), ip_to_request) #lo que le entra aqui es la ip por la que quiere enviar un archivo, la ip por que que tiene que enviar basicamente
 		s = ip.split('/')
 		print s[0]
-		if s[0] == ip_to_request:
+		if not s[0] == ip_to_request:#not
 			generador = gen_codQR(ip, set_port)
 			tam = generador.generar(file_name)
 			disp = display_qr(tam)
 		else:
-			sendFile(con.getsocket(), ip, set_port, 'to_send/' + file_name, ip_to_request)
+			sendFile(con.getsocket(), ip, set_port, file_name, host)
 
 # filename = raw_input("Filename -> ")
 # print("Filename:" + filename)
