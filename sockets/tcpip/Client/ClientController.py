@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 from Conection import Conection
 from Server import Server
+
 import os
 import threading
 from qr_generator import gen_codQR
 from qr_showcase import display_qr
-import socket
 
+import socket
 import numpy as np
 import cv2
 import sys
@@ -24,16 +26,17 @@ msj = ""
 ports = ""
 ips = ""
 
-
-
 WIDTH = 1024
+# Puerto en el que escucha
 PORT = 12347
 
 def hello(con):
+	'''
+	Solicitud HELLO
+	'''
 	print "-------------------------hello"
 	con.send('HELLO ' + str(PORT))
 	data = con.recv(WIDTH)
-
 	if data[:5] == 'HELLO':
 		print('Server say HELLO')
 	else:
@@ -41,6 +44,7 @@ def hello(con):
 
 
 def bye(con):
+	#Solicitud BYE
 	print "-------------------------bye"
 	con.send('BYE ')
 	print('Server say BYE')
@@ -48,6 +52,9 @@ def bye(con):
 
 
 def requestIP(con, ip):
+	'''
+	Solicitud TO solicitando la direccion de la ip
+	'''
 	print "-------------------------requestIP"
 	con.send('TO ' + ip)
 	data = con.recv(WIDTH)
@@ -58,23 +65,24 @@ def requestIP(con, ip):
 
 
 def sendFile(socket, ip, port, filename, host):
+	'''
+	Enviar el archivo 
+	La estructura del mensaje inicial es : SEND TamaniodelArchivo NombreArchivo IP's(ip1/ip2/ip3 ... /ipn) PORT's(port1/port2/port3.../portn)
+	'''
 	print "-------------------------sendFile"
 	dest_ip = ip.split('/')
 	new_dest = ''
 	if len(dest_ip) == 1:
-		# 192.168.1.1
 		dest_host = dest_ip[0]
 	else:
-		# 192.168.1.1/192.168.1.104/192.168.1.130
 		dest_host = dest_ip[0]
 		for des in dest_ip[1:]:
 			new_dest += des + '/'
 		new_dest = new_dest[:-1]
 
 	if os.path.isfile(filename):
-		print "entro"
 		if dest_ip[0] == host:
-
+			#Si el mensaje va para el servidor
 			dest_ports = port.split('/')
 			new_dest_ports = ''
 			for d in dest_ports[1:]:
@@ -82,9 +90,8 @@ def sendFile(socket, ip, port, filename, host):
 			new_dest_ports = new_dest_ports[:-1]
 
 			s = socket
-			print "Sending File"
+			print "Sending File .."
 			s.send('SEND ' + str(os.path.getsize(filename)) + ' ' + filename + ' ' + new_dest + ' ' + new_dest_ports )
-
 			data = s.recv(WIDTH)
 			if data[:2] == 'OK':
 				with open(filename, 'rb') as f:
@@ -93,10 +100,12 @@ def sendFile(socket, ip, port, filename, host):
 					while bytesToSend != "":
 						bytesToSend = f.read(WIDTH)
 						s.send(bytesToSend)
+				print "File was sent"
 			else:
 				print "Error while sending file:" + filename
 				s.send("ERROR")
 		else:
+			# Si el mensaje va para otro nodo
 			dest_ports = port.split('/')
 			new_dest_ports = ''
 			for d in dest_ports[1:]:
@@ -106,9 +115,8 @@ def sendFile(socket, ip, port, filename, host):
 			file_transfer = Conection(int(dest_ports[0]), dest_host)
 			file_transfer.connect()
 			s = file_transfer.getsocket()
-			print "Sending File"
+			print "Sending File .."
 			s.send('SEND ' + str(os.path.getsize(filename)) + ' ' + filename + ' ' + new_dest + ' ' + new_dest_ports)
-
 			data = s.recv(WIDTH)
 			if data[:2] == 'OK':
 				with open(filename, 'rb') as f:
@@ -117,6 +125,7 @@ def sendFile(socket, ip, port, filename, host):
 					while bytesToSend != "":
 						bytesToSend = f.read(WIDTH)
 						s.send(bytesToSend)
+				print "File was sent"
 			else:
 				print "Error while sending file:" + filename
 				s.send("ERROR")
@@ -124,10 +133,10 @@ def sendFile(socket, ip, port, filename, host):
 
 
 def recieve(con, ip, port, host):
-	print "entro al while"
+	# Se pone en proceso para recivir un archivo
 	data = con.recv(WIDTH)
-	print data
 	if data[:4] == 'SEND':
+		print("Got SEND")
 		tmp_data = data.split(' ')
 		filesize = long(tmp_data[1])
 		filename = tmp_data[2]
@@ -137,7 +146,7 @@ def recieve(con, ip, port, host):
 		else:
 			to_who = tmp_data[3]
 			ports = tmp_data[4]
-		print "File" + filename + ", " + str(filesize) + "Bytes"
+		print "Got File" + filename + ", " + str(filesize) + "Bytes"
 		con.send('OK')
 		f = open(filename, 'wb')
 		data = con.recv(WIDTH)
@@ -148,9 +157,8 @@ def recieve(con, ip, port, host):
 			totalRecv += len(data)
 			f.write(data)
 			print "{0:.2f}".format((totalRecv / float(filesize)) * 100) + "% Done"
-		print "Download Complete!"
+		print "File recieved!"
 		f.close()
-
 		tmp = to_who.split('/')
 		if tmp[0] == '':
 			print "Got file to me"
@@ -158,7 +166,6 @@ def recieve(con, ip, port, host):
 			ip = tmp[0]
 			dest_ports = ports.split('/')
 			new_con = Conection(ip, int(ports[0]))
-
 			dest_ips = ''
 			for i in tmp[1:]:
 				dest_ips += i + '/'
@@ -167,13 +174,12 @@ def recieve(con, ip, port, host):
 			for i in dest_ports[1:]:
 				new_dest_ports += i + '/'
 			new_dest_ports = new_dest_ports[:-1]
-
 			sendFile(new_con.getsocket(), dest_ips, new_dest_ports, filename, host)
 
 
 def listen_Con(listen_port,host):
 	allowed_clients = 25
-
+	#Ponerse a escuchar por si recibe un archivo
 	server = Server(listen_port)
 	server.bind()
 	server.listen(allowed_clients)
@@ -250,17 +256,12 @@ def main():
 		ip, set_port = requestIP(con.getsocket(), ip_to_request) #lo que le entra aqui es la ip por la que quiere enviar un archivo, la ip por que que tiene que enviar basicamente
 		s = ip.split('/')
 		print s[0]
-		if not s[0] == ip_to_request:#not
+		if s[0] == ip_to_request:#not
 			generador = gen_codQR(ip, set_port)
 			tam = generador.generar(file_name)
 			disp = display_qr(tam)
 		else:
 			sendFile(con.getsocket(), ip, set_port, file_name, host)
-
-# filename = raw_input("Filename -> ")
-# print("Filename:" + filename)
-
-# print "K"
 
 
 if __name__ == '__main__':
